@@ -25,10 +25,11 @@ import 'package:pull_down_button/pull_down_button.dart';
 import 'package:bluebubbles/services/network/backend_service.dart';
 
 class HeaderText extends StatelessWidget {
-  const HeaderText({Key? key, required this.controller, this.fontSize});
+  const HeaderText({Key? key, required this.controller, this.fontSize, this.fontWeight = FontWeight.w600});
 
   final ConversationListController controller;
   final double? fontSize;
+  final FontWeight fontWeight;
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +45,7 @@ class HeaderText extends StatelessWidget {
             : "Messages",
         style: context.textTheme.headlineLarge!.copyWith(
           color: context.theme.colorScheme.onBackground,
-          fontWeight: FontWeight.w600,
+          fontWeight: fontWeight,
           fontSize: fontSize,
         ),
         maxLines: 1,
@@ -102,11 +103,12 @@ class MaterialOverflowMenu extends StatelessWidget {
     return PopupMenuButton<int>(
       color: context.theme.colorScheme.properSurface.lightenOrDarken(ss.settings.skin.value == Skins.Samsung ? 20 : 0)
           .withOpacity(ss.settings.windowEffect.value != WindowEffect.disabled ? 0.9 : 1),
-      shape: ss.settings.skin.value != Skins.Material ? const RoundedRectangleBorder(
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.all(
-          Radius.circular(20.0),
+          Radius.circular(ss.settings.skin.value != Skins.Material ? 20.0 : 4.0),
         ),
-      ) : null,
+      ),
+      tooltip: ss.settings.skin.value == Skins.Material ? "Account and settings" : null,
       onSelected: (int value) async {
         if (value == 0) {
           chats.markAllAsRead();
@@ -229,10 +231,15 @@ class MaterialOverflowMenu extends StatelessWidget {
             ),
         ];
       },
-      icon: ss.settings.skin.value == Skins.Material ? Icon(
-        Icons.more_vert,
-        color: context.theme.colorScheme.properOnSurface,
-        size: 25,
+      // Google Messages shows the account avatar in the top bar, which opens the menu
+      icon: ss.settings.skin.value == Skins.Material ? IgnorePointer(
+        child: ContactAvatarWidget(
+          size: 32,
+          fontSize: 14,
+          borderThickness: 0,
+          preferHighResAvatar: true,
+          scaleSize: false,
+        ),
       ) : null,
       child: ss.settings.skin.value == Skins.Material
         ? null

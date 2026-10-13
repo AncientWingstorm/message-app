@@ -75,7 +75,7 @@ class ThemeStruct {
 
   static ThemeStruct getLightTheme() {
     final name = ss.prefs.getString("selected-light");
-    final query = Database.themes.query(ThemeStruct_.name.equals(name ?? "Bright White")).build();
+    final query = Database.themes.query(ThemeStruct_.name.equals(name ?? googleMessagesLightName)).build();
     query.limit = 1;
     final result = query.findFirst();
     if (result == null) {
@@ -86,7 +86,7 @@ class ThemeStruct {
 
   static ThemeStruct getDarkTheme() {
     final name = ss.prefs.getString("selected-dark");
-    final query = Database.themes.query(ThemeStruct_.name.equals(name ?? "OLED Dark")).build();
+    final query = Database.themes.query(ThemeStruct_.name.equals(name ?? googleMessagesDarkName)).build();
     query.limit = 1;
     final result = query.findFirst();
     if (result == null) {

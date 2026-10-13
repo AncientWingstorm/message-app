@@ -80,12 +80,18 @@ class ConversationViewState extends OptimizedState<ConversationView> {
           colorScheme: context.theme.colorScheme.copyWith(
             primary: context.theme.colorScheme.bubble(context, chat.isIMessage),
             onPrimary: context.theme.colorScheme.onBubble(context, chat.isIMessage),
-            surface: ss.settings.monetTheming.value == Monet.full
-                ? null
-                : (context.theme.extensions[BubbleColors] as BubbleColors?)?.receivedBubbleColor,
-            onSurface: ss.settings.monetTheming.value == Monet.full
-                ? null
-                : (context.theme.extensions[BubbleColors] as BubbleColors?)?.onReceivedBubbleColor,
+            // Google Messages style: incoming bubbles (and other tonal surfaces) use a soft container color
+            surface: material
+                ? context.theme.colorScheme.gmReceivedBubble
+                : ss.settings.monetTheming.value == Monet.full
+                    ? null
+                    : (context.theme.extensions[BubbleColors] as BubbleColors?)?.receivedBubbleColor,
+            onSurface: material
+                ? context.theme.colorScheme.gmOnReceivedBubble
+                : ss.settings.monetTheming.value == Monet.full
+                    ? null
+                    : (context.theme.extensions[BubbleColors] as BubbleColors?)?.onReceivedBubbleColor,
+            surfaceVariant: material ? context.theme.colorScheme.gmReceivedBubble : null,
             outline: controller.backgroundPoster.value != null ? Colors.white : null,
           ),
         ),

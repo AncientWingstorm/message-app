@@ -50,18 +50,24 @@ class TimestampSeparator extends StatelessWidget {
 
 
     var child = timestamp != null ? Padding(
-      padding: const EdgeInsets.all(14.0),
+      padding: ss.settings.skin.value == Skins.Material
+          ? const EdgeInsets.only(top: 20, bottom: 12, left: 14, right: 14)
+          : const EdgeInsets.all(14.0),
       child: RichText(
         textAlign: TextAlign.center,
         text: TextSpan(
-          style: context.theme.textTheme.labelSmall!.copyWith(color: context.theme.colorScheme.outline, fontWeight: FontWeight.normal),
+          style: ss.settings.skin.value == Skins.Material
+              ? context.theme.textTheme.labelMedium!.copyWith(color: context.theme.colorScheme.onSurfaceVariant, fontWeight: FontWeight.w500)
+              : context.theme.textTheme.labelSmall!.copyWith(color: context.theme.colorScheme.outline, fontWeight: FontWeight.normal),
           children: [
             if (message.dateScheduled != null && olderMessage?.dateScheduled == null)
               TextSpan(
                 text: "Send Later\n",
                 style: context.theme.textTheme.labelSmall!.copyWith(fontWeight: FontWeight.w600, color: context.theme.colorScheme.outline, height: 2.5),
               ),
-            if (timestamp.item1 != null)
+            if (timestamp.item1 != null && ss.settings.skin.value == Skins.Material)
+              TextSpan(text: "${timestamp.item1!} • "),
+            if (timestamp.item1 != null && ss.settings.skin.value != Skins.Material)
               TextSpan(
                 text: "${timestamp.item1!} ",
                 style: context.theme.textTheme.labelSmall!.copyWith(fontWeight: FontWeight.w600, color: context.theme.colorScheme.outline),

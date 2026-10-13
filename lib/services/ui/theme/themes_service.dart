@@ -17,6 +17,9 @@ import 'package:universal_io/io.dart';
 
 ThemesService ts = Get.isRegistered<ThemesService>() ? Get.find<ThemesService>() : Get.put(ThemesService());
 
+const String googleMessagesDarkName = "Google Messages Dark";
+const String googleMessagesLightName = "Google Messages Light";
+
 class ThemesService extends GetxService {
   mui_utils.CorePalette? monetPalette;
   Color? windowsAccentColor;
@@ -111,7 +114,101 @@ class ThemesService extends GetxService {
     ),
   ]);
 
+  /// Google Messages style themes (Material 3 baseline Google blue)
+  final googleMessagesLightTheme = FlexColorScheme(
+    textTheme: Typography.englishLike2021.merge(Typography.blackMountainView),
+    colorScheme: ColorScheme(
+      brightness: Brightness.light,
+      primary: HexColor("0B57D0"),
+      onPrimary: Colors.white,
+      primaryContainer: HexColor("D3E3FD"),
+      onPrimaryContainer: HexColor("041E49"),
+      secondary: HexColor("00639B"),
+      onSecondary: Colors.white,
+      secondaryContainer: HexColor("C2E7FF"),
+      onSecondaryContainer: HexColor("001D35"),
+      tertiary: HexColor("146C2E"),
+      onTertiary: Colors.white,
+      tertiaryContainer: HexColor("C4EED0"),
+      onTertiaryContainer: HexColor("072711"),
+      error: HexColor("B3261E"),
+      onError: Colors.white,
+      errorContainer: HexColor("F9DEDC"),
+      onErrorContainer: HexColor("410E0B"),
+      background: Colors.white,
+      onBackground: HexColor("1F1F1F"),
+      surface: HexColor("F0F4F9"),
+      onSurface: HexColor("1F1F1F"),
+      surfaceVariant: HexColor("E1E3E1"),
+      onSurfaceVariant: HexColor("444746"),
+      outline: HexColor("747775"),
+      outlineVariant: HexColor("C4C7C5"),
+      shadow: Colors.black,
+      scrim: Colors.black,
+      inverseSurface: HexColor("303030"),
+      onInverseSurface: HexColor("F2F2F2"),
+      inversePrimary: HexColor("A8C7FA"),
+    ),
+    useMaterial3: true,
+  ).toTheme.copyWith(splashFactory: InkSparkle.splashFactory, extensions: [
+    BubbleText(
+      bubbleText: Typography.englishLike2021.bodyMedium!.copyWith(
+        fontSize: 16,
+        height: Typography.englishLike2021.bodyMedium!.height! * 0.85,
+        color: HexColor("1F1F1F"),
+      ),
+    ),
+  ]);
+
+  final googleMessagesDarkTheme = FlexColorScheme(
+    textTheme: Typography.englishLike2021.merge(Typography.whiteMountainView),
+    colorScheme: ColorScheme(
+      brightness: Brightness.dark,
+      primary: HexColor("A8C7FA"),
+      onPrimary: HexColor("062E6F"),
+      primaryContainer: HexColor("0842A0"),
+      onPrimaryContainer: HexColor("D3E3FD"),
+      secondary: HexColor("7FCFFF"),
+      onSecondary: HexColor("003355"),
+      secondaryContainer: HexColor("004A77"),
+      onSecondaryContainer: HexColor("C2E7FF"),
+      tertiary: HexColor("6DD58C"),
+      onTertiary: HexColor("0A3818"),
+      tertiaryContainer: HexColor("0F5223"),
+      onTertiaryContainer: HexColor("C4EED0"),
+      error: HexColor("F2B8B5"),
+      onError: HexColor("601410"),
+      errorContainer: HexColor("8C1D18"),
+      onErrorContainer: HexColor("F9DEDC"),
+      background: HexColor("131314"),
+      onBackground: HexColor("E3E3E3"),
+      surface: HexColor("1E1F20"),
+      onSurface: HexColor("E3E3E3"),
+      surfaceVariant: HexColor("444746"),
+      onSurfaceVariant: HexColor("C4C7C5"),
+      outline: HexColor("8E918F"),
+      outlineVariant: HexColor("444746"),
+      shadow: Colors.black,
+      scrim: Colors.black,
+      inverseSurface: HexColor("E3E3E3"),
+      onInverseSurface: HexColor("303030"),
+      inversePrimary: HexColor("0B57D0"),
+    ),
+    useMaterial3: true,
+  ).toTheme.copyWith(splashFactory: InkSparkle.splashFactory, extensions: [
+    BubbleText(
+      bubbleText: Typography.englishLike2021.bodyMedium!.copyWith(
+        fontSize: 16,
+        height: Typography.englishLike2021.bodyMedium!.height! * 0.85,
+        color: HexColor("E3E3E3"),
+      ),
+    ),
+  ]);
+
   List<ThemeStruct> get defaultThemes => [
+    // NOTE: index 0 / 1 are used as the dark / light fallbacks
+    ThemeStruct(name: googleMessagesDarkName, themeData: googleMessagesDarkTheme),
+    ThemeStruct(name: googleMessagesLightName, themeData: googleMessagesLightTheme),
     ThemeStruct(name: "OLED Dark", themeData: oledDarkTheme),
     ThemeStruct(name: "Bright White", themeData: whiteLightTheme),
     ThemeStruct(name: "Nord Theme", themeData: nordDarkTheme),
@@ -231,7 +328,7 @@ class ThemesService extends GetxService {
     final darkName = ss.prefs.getString("previous-dark");
     ThemeStruct? previous = allThemes.firstWhereOrNull((e) => e.name == darkName);
 
-    previous ??= defaultThemes.firstWhere((element) => element.name == "OLED Dark");
+    previous ??= defaultThemes.firstWhere((element) => element.name == googleMessagesDarkName);
 
     // Remove the previous flags
     await ss.prefs.remove("previous-dark");
@@ -244,7 +341,7 @@ class ThemesService extends GetxService {
     final lightName = ss.prefs.getString("previous-light");
     ThemeStruct? previous = allThemes.firstWhereOrNull((e) => e.name == lightName);
 
-    previous ??= defaultThemes.firstWhere((element) => element.name == "Bright White");
+    previous ??= defaultThemes.firstWhere((element) => element.name == googleMessagesLightName);
 
     // Remove the previous flags
     await ss.prefs.remove("previous-light");

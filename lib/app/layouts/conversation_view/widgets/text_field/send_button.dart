@@ -29,7 +29,16 @@ class SendButtonState extends OptimizedState<SendButton> with SingleTickerProvid
       duration: Duration(seconds: ss.settings.sendDelay.value),
       animationBehavior: AnimationBehavior.preserve);
 
-  Color get baseColor => iOS ? context.theme.colorScheme.primary : context.theme.colorScheme.properSurface;
+  Color get baseColor => iOS
+      ? context.theme.colorScheme.primary
+      : material
+          ? context.theme.colorScheme.primaryContainer
+          : context.theme.colorScheme.properSurface;
+
+  /// Google Messages style: a filled circular send button next to the compose field
+  bool get filledCircle => iOS || material;
+
+  double get buttonSize => material ? 44 : 28;
 
   @override
   void initState() {
@@ -78,22 +87,22 @@ class SendButtonState extends OptimizedState<SendButton> with SingleTickerProvid
           },
           child: TextButton(
         style: TextButton.styleFrom(
-          backgroundColor: iOS ? context.theme.colorScheme.primary : null,
+          backgroundColor: filledCircle ? baseColor : null,
           shape: const CircleBorder(),
           padding: const EdgeInsets.all(0),
-          maximumSize: const Size(28, 28),
-          minimumSize: const Size(28, 28),
+          maximumSize: Size(buttonSize, buttonSize),
+          minimumSize: Size(buttonSize, buttonSize),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         ),
         child: AnimatedBuilder(
           animation: controller,
           builder: (context, widget) {
             return Container(
-              constraints: const BoxConstraints(minHeight: 28, minWidth: 28),
+              constraints: BoxConstraints(minHeight: buttonSize, minWidth: buttonSize),
               decoration: BoxDecoration(
-                  shape: iOS ? BoxShape.circle : BoxShape.rectangle,
-                  borderRadius: iOS ? null : BorderRadius.circular(10),
-                  gradient: iOS || controller.value != 0
+                  shape: filledCircle ? BoxShape.circle : BoxShape.rectangle,
+                  borderRadius: filledCircle ? null : BorderRadius.circular(10),
+                  gradient: filledCircle || controller.value != 0
                       ? LinearGradient(
                           begin: Alignment.bottomCenter,
                           end: Alignment.topCenter,
@@ -109,12 +118,16 @@ class SendButtonState extends OptimizedState<SendButton> with SingleTickerProvid
               alignment: Alignment.center,
               child: Icon(
                 controller.value == 0
-                    ? (iOS ? CupertinoIcons.arrow_up : Icons.send_outlined)
+                    ? (iOS ? CupertinoIcons.arrow_up : material ? Icons.send : Icons.send_outlined)
                     : (iOS ? CupertinoIcons.xmark : Icons.close),
                 color: controller.value == 0
-                    ? (iOS ? context.theme.colorScheme.onPrimary : context.theme.colorScheme.secondary)
+                    ? (iOS
+                        ? context.theme.colorScheme.onPrimary
+                        : material
+                            ? context.theme.colorScheme.onPrimaryContainer
+                            : context.theme.colorScheme.secondary)
                     : context.theme.colorScheme.onError,
-                size: iOS || controller.value != 0 ? 20 : 28,
+                size: material ? 22 : iOS || controller.value != 0 ? 20 : 28,
               ),
             );
           },

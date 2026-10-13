@@ -21,7 +21,7 @@ class DeliveredIndicator extends CustomStateful<MessageWidgetController> {
 
 class _DeliveredIndicatorState extends CustomState<DeliveredIndicator, void, MessageWidgetController> {
   Message get message => controller.message;
-  bool get showAvatar => (controller.cvController?.chat ?? cm.activeChat!.chat).isGroup;
+  bool get showAvatar => (controller.cvController?.chat ?? cm.activeChat!.chat).isGroup || material;
 
   @override
   void initState() {
@@ -60,6 +60,12 @@ class _DeliveredIndicatorState extends CustomState<DeliveredIndicator, void, Mes
   }
 
   List<InlineSpan> buildTwoPiece(String action, String? date) {
+    if (material) {
+      // Google Messages style: "Read • 10:42 AM" in a single, quiet style
+      final style = context.theme.textTheme.labelMedium!.copyWith(color: context.theme.colorScheme.onSurfaceVariant, fontWeight: FontWeight.normal);
+      final parts = [action, date].where((e) => e != null && e.isNotEmpty).join(" • ");
+      return [TextSpan(text: parts, style: style)];
+    }
     return [
       TextSpan(text: "$action ",
         style: context.theme.textTheme.labelSmall!.copyWith(fontWeight: FontWeight.w600, color: context.theme.colorScheme.outline),),
@@ -73,7 +79,7 @@ class _DeliveredIndicatorState extends CustomState<DeliveredIndicator, void, Mes
     if (controller.audioWasKept.value != null) {
       return buildTwoPiece("Kept", buildDate(controller.audioWasKept.value!));
     } else if (!(message.isFromMe ?? false)) {
-      return buildTwoPiece("Received", buildDate(message.dateCreated));
+      return material ? buildTwoPiece(buildDate(message.dateCreated), null) : buildTwoPiece("Received", buildDate(message.dateCreated));
     } else if (message.dateRead != null) {
       return buildTwoPiece("Read", buildDate(message.dateRead));
     } else if (message.dateDelivered != null) {

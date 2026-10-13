@@ -1219,8 +1219,8 @@ class _SettingsPageState extends OptimizedState<SettingsPage> {
                                                     await ss.settings.saveAsync();
 
                                                     await ss.prefs.clear();
-                                                    await ss.prefs.setString("selected-dark", "OLED Dark");
-                                                    await ss.prefs.setString("selected-light", "Bright White");
+                                                    await ss.prefs.setString("selected-dark", googleMessagesDarkName);
+                                                    await ss.prefs.setString("selected-light", googleMessagesLightName);
                                                     Database.themes.putMany(ts.defaultThemes);
                                                     
                                                     // Clear the FCM data from the database, shared preferences, and locally
@@ -1257,8 +1257,8 @@ class _SettingsPageState extends OptimizedState<SettingsPage> {
                                                     await ss.settings.saveAsync();
 
                                                     await ss.prefs.clear();
-                                                    await ss.prefs.setString("selected-dark", "OLED Dark");
-                                                    await ss.prefs.setString("selected-light", "Bright White");
+                                                    await ss.prefs.setString("selected-dark", googleMessagesDarkName);
+                                                    await ss.prefs.setString("selected-light", googleMessagesLightName);
                                                     Database.themes.putMany(ts.defaultThemes);
                                                     
                                                     // Clear the FCM data from the database, shared preferences, and locally

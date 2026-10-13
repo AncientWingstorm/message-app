@@ -42,7 +42,10 @@ class MaterialHeader extends StatelessWidget implements PreferredSizeWidget {
           : SystemUiOverlayStyle.dark,
       automaticallyImplyLeading: false,
       toolbarHeight: (kIsDesktop ? 25 : 0) + kToolbarHeight,
-      leadingWidth: 30,
+      leadingWidth: 40,
+      scrolledUnderElevation: 0,
+      surfaceTintColor: Colors.transparent,
+      titleSpacing: 4,
       leading: Padding(
         padding: EdgeInsets.only(left: 5.0, top: kIsDesktop ? 20 : 0),
         child: BackButton(
@@ -118,11 +121,11 @@ class MaterialHeader extends StatelessWidget implements PreferredSizeWidget {
           padding: EdgeInsets.only(top: kIsDesktop ? 20 : 0),
           child: PopupMenuButton<int>(
             color: context.theme.colorScheme.properSurface,
-            shape: ss.settings.skin.value != Skins.Material ? const RoundedRectangleBorder(
+            shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.all(
-                Radius.circular(20.0),
+                Radius.circular(ss.settings.skin.value != Skins.Material ? 20.0 : 4.0),
               ),
-            ) : null,
+            ),
             onSelected: (int value) {
               if (value == 0) {
                 Navigator.of(context).push(
@@ -508,7 +511,7 @@ class _ChatIconAndTitleState extends CustomState<_ChatIconAndTitle, void, Conver
             ignoring: true,
             child: ContactAvatarGroupWidget(
               chat: controller.chat,
-              size: !controller.chat.isGroup ? 35 : 40,
+              size: 40,
             ),
           ),
         ),
@@ -525,7 +528,9 @@ class _ChatIconAndTitleState extends CustomState<_ChatIconAndTitle, void, Conver
                 }
                 return Text(
                   _title,
-                  style: context.theme.textTheme.titleLarge!.apply(color: context.theme.colorScheme.onBackground, fontSizeFactor: 0.85),
+                  style: material
+                      ? context.theme.textTheme.titleLarge!.copyWith(color: context.theme.colorScheme.onBackground, fontWeight: FontWeight.w400, fontSize: 20)
+                      : context.theme.textTheme.titleLarge!.apply(color: context.theme.colorScheme.onBackground, fontSizeFactor: 0.85),
                   maxLines: 1,
                   overflow: TextOverflow.fade,
                 );

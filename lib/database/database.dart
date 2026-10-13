@@ -69,9 +69,25 @@ class Database {
 
     try {
       if (Database.themes.isEmpty()) {
-        await ss.prefs.setString("selected-dark", "OLED Dark");
-        await ss.prefs.setString("selected-light", "Bright White");
+        await ss.prefs.setString("selected-dark", googleMessagesDarkName);
+        await ss.prefs.setString("selected-light", googleMessagesLightName);
         Database.themes.putMany(ts.defaultThemes);
+      }
+
+      // Make sure the Google Messages themes exist on databases seeded before they were added
+      for (final theme in ts.defaultThemes.where((t) => t.name == googleMessagesDarkName || t.name == googleMessagesLightName)) {
+        if (Database.themes.query(ThemeStruct_.name.equals(theme.name)).build().findFirst() == null) {
+          Database.themes.put(theme);
+        }
+      }
+
+      // One-time switch of existing installs to the Google Messages look
+      if (!(ss.prefs.getBool("google-messages-reskin-applied") ?? false)) {
+        await ss.prefs.setString("selected-dark", googleMessagesDarkName);
+        await ss.prefs.setString("selected-light", googleMessagesLightName);
+        ss.settings.skin.value = Skins.Material;
+        await ss.saveSettings();
+        await ss.prefs.setBool("google-messages-reskin-applied", true);
       }
     } catch (e, s) {
       Logger.error("Failed to seed themes!", error: e, trace: s);

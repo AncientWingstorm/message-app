@@ -75,7 +75,9 @@ class TailClipper extends CustomClipper<Path>{
 
   @override
   bool shouldReclip(covariant TailClipper oldClipper) {
-    return showTail != oldClipper.showTail;
+    return showTail != oldClipper.showTail
+        || connectUpper != oldClipper.connectUpper
+        || connectLower != oldClipper.connectLower;
   }
 }
 

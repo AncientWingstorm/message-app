@@ -76,7 +76,15 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
       && !message.guid!.startsWith("error");
   bool get showSender => !message.isGroupEvent && (!message.sameSender(olderMessage) || (olderMessage?.isGroupEvent ?? false)
       || (olderMessage == null || !message.dateCreated!.isWithin(olderMessage!.dateCreated!, minutes: 30)));
-  bool get showAvatar => chat.isGroup;
+  bool get showAvatar => chat.isGroup || material;
+  /// Google Messages style grouping: consecutive bubbles from the same sender get
+  /// tighter corners on the side they connect
+  bool connectLower(MessagePart e) => iOS
+      ? false
+      : e.part != controller.parts.length - 1 || (material && !message.showTail(newerMessage));
+  bool connectUpper(MessagePart e) => iOS
+      ? false
+      : e.part != 0 || (material && olderMessage != null && !olderMessage!.isGroupEvent && !olderMessage!.showTail(message));
   bool isEditing(int part) => message.isFromMe! && widget.cvController.editing.firstWhereOrNull((e2) => e2.item1.guid == message.guid! && e2.item2.part == part) != null;
 
   List<MessagePart> messageParts = [];
@@ -120,7 +128,8 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
   }
 
   List<Color> getBubbleColors() {
-    List<Color> bubbleColors = [context.theme.colorScheme.properSurface, context.theme.colorScheme.properSurface];
+    final Color baseColor = material ? context.theme.colorScheme.gmReceivedBubble : context.theme.colorScheme.properSurface;
+    List<Color> bubbleColors = [baseColor, baseColor];
     if (ss.settings.colorfulBubbles.value && !message.isFromMe!) {
       if (message.handle?.color == null) {
         bubbleColors = toColorGradient(message.handle?.address);
@@ -251,9 +260,8 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
                                       clipper: TailClipper(
                                         isFromMe: message.isFromMe!,
                                         showTail: message.showTail(newerMessage) && e.part == controller.parts.length - 1,
-                                        connectLower: iOS ? false : (e.part != 0 && e.part != controller.parts.length - 1)
-                                            || (e.part == 0 && controller.parts.length > 1),
-                                        connectUpper: iOS ? false : e.part != 0,
+                                        connectLower: connectLower(e),
+                                        connectUpper: connectUpper(e),
                                       ),
                                       child: TextBubble(
                                         parentController: controller,
@@ -407,9 +415,8 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
                                                         clipper: TailClipper(
                                                           isFromMe: message.isFromMe!,
                                                           showTail: false,
-                                                          connectLower: iOS ? false : (e.part != 0 && e.part != controller.parts.length - 1)
-                                                              || (e.part == 0 && controller.parts.length > 1),
-                                                          connectUpper: iOS ? false : e.part != 0,
+                                                          connectLower: connectLower(e),
+                                                          connectUpper: connectUpper(e),
                                                         ),
                                                         child: TextBubble(
                                                           parentController: controller,
@@ -472,9 +479,8 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
                                                               clipper: TailClipper(
                                                                 isFromMe: message.isFromMe!,
                                                                 showTail: message.showTail(newerMessage) && e.part == controller.parts.length - 1,
-                                                                connectLower: iOS ? false : (e.part != 0 && e.part != controller.parts.length - 1)
-                                                                    || (e.part == 0 && controller.parts.length > 1),
-                                                                connectUpper: iOS ? false : e.part != 0,
+                                                                connectLower: connectLower(e),
+                                                                connectUpper: connectUpper(e),
                                                               ),
                                                               child: Stack(
                                                                 alignment: Alignment.centerRight,
@@ -668,9 +674,8 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
                                                               customPath: (size) => TailClipper(
                                                                 isFromMe: message.isFromMe!,
                                                                 showTail: message.showTail(newerMessage) && e.part == controller.parts.length - 1,
-                                                                connectLower: iOS ? false : (e.part != 0 && e.part != controller.parts.length - 1)
-                                                                    || (e.part == 0 && controller.parts.length > 1),
-                                                                connectUpper: iOS ? false : e.part != 0,
+                                                                connectLower: connectLower(e),
+                                                                connectUpper: connectUpper(e),
                                                               ).getClip(size),
                                                               color: context.theme.colorScheme.primaryContainer,
                                                               strokeWidth: 2,

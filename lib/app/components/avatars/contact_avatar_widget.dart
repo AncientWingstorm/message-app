@@ -148,7 +148,15 @@ class _ContactAvatarWidgetState extends OptimizedState<ContactAvatarWidget> {
               height: size,
               padding: widget.padding,
               decoration: BoxDecoration(
-                gradient: LinearGradient(
+                // Google Messages style: solid letter-tile colors
+                color: material
+                    ? (widget.handle?.color != null
+                        ? HexColor(widget.handle!.color!)
+                        : widget.handle == null
+                            ? context.theme.colorScheme.primary
+                            : googleMessagesAvatarColor(widget.handle!.address))
+                    : null,
+                gradient: material ? null : LinearGradient(
                   begin: AlignmentDirectional.topStart,
                   end: AlignmentDirectional.bottomEnd,
                   colors: [
@@ -184,8 +192,9 @@ class _ContactAvatarWidgetState extends OptimizedState<ContactAvatarWidget> {
                       initials!,
                       key: Key("$keyPrefix-avatar-text"),
                       style: TextStyle(
-                        fontSize: (widget.fontSize ?? 18).roundToDouble() * (material ? 1.25 : 1),
-                        color: material ? context.theme.colorScheme.background : Colors.white,
+                        fontSize: material ? (size * 0.45).roundToDouble() : (widget.fontSize ?? 18).roundToDouble(),
+                        fontWeight: material ? FontWeight.w500 : null,
+                        color: material && widget.handle == null ? context.theme.colorScheme.onPrimary : Colors.white,
                       ),
                       textAlign: TextAlign.center,
                     );
@@ -194,9 +203,9 @@ class _ContactAvatarWidgetState extends OptimizedState<ContactAvatarWidget> {
                         padding: const EdgeInsets.only(left: 1),
                         child: Icon(
                           iOS ? CupertinoIcons.person_fill : Icons.person,
-                          color: material ? context.theme.colorScheme.background : Colors.white,
+                          color: material && widget.handle == null ? context.theme.colorScheme.onPrimary : Colors.white,
                           key: Key("$keyPrefix-avatar-icon"),
-                          size: size / 2 * (material ? 1.25 : 1),
+                          size: size / 2 * (material ? 1.2 : 1),
                         ));
                   }
                 } else {

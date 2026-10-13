@@ -412,7 +412,7 @@ class ConversationTextFieldState extends CustomState<ConversationTextField, void
                       : material
                           ? Icons.add_circle_outline
                           : Icons.add,
-                  color: context.theme.colorScheme.outline,
+                  color: material ? context.theme.colorScheme.onSurfaceVariant : context.theme.colorScheme.outline,
                   size: 28,
                 ),
                 visualDensity: Platform.isAndroid ? VisualDensity.compact : null,
@@ -575,7 +575,7 @@ class ConversationTextFieldState extends CustomState<ConversationTextField, void
                                                   Duration elapsed = DateTime.now().duration() - start;
                                                   return Container(
                                                     padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
-                                                    width: textFieldSize.width - (samsung ? 0 : 80),
+                                                    width: textFieldSize.width - (samsung || material ? 0 : 80),
                                                     height: textFieldSize.height - 15,
                                                     child: Center(
                                                       child: AnimatedOpacity(
@@ -599,7 +599,7 @@ class ConversationTextFieldState extends CustomState<ConversationTextField, void
                                               recorderController: recorderController,
                                               textFieldSize: textFieldSize,
                                               iOS: iOS,
-                                              samsung: samsung,
+                                              samsung: samsung || material,
                                         );
                                       }),
                               ))),
@@ -607,9 +607,9 @@ class ConversationTextFieldState extends CustomState<ConversationTextField, void
                   ],
                 ),
               ),
-              if (samsung)
+              if (samsung || material)
                 Padding(
-                  padding: const EdgeInsets.only(right: 5.0),
+                  padding: EdgeInsets.only(right: material ? 8.0 : 5.0),
                   child: TextFieldSuffix(
                     subjectTextController: controller.subjectTextController,
                     textController: controller.textController,
@@ -842,6 +842,8 @@ class TextFieldComponentState extends State<TextFieldComponent> {
 
   bool get samsung => ss.settings.skin.value == Skins.Samsung;
 
+  bool get material => ss.settings.skin.value == Skins.Material;
+
   Chat? get chat => controller?.chat;
 
   bool get isChatCreator => focusNode != null;
@@ -867,8 +869,8 @@ class TextFieldComponentState extends State<TextFieldComponent> {
                   borderRadius: BorderRadius.circular(20),
                 )
               : BoxDecoration(
-                  color: context.theme.colorScheme.properSurface,
-                  borderRadius: BorderRadius.circular(20),
+                  color: material ? context.theme.colorScheme.gmContainer : context.theme.colorScheme.properSurface,
+                  borderRadius: BorderRadius.circular(material ? 24 : 20),
                 ),
           clipBehavior: Clip.antiAlias,
           child: AnimatedSize(
@@ -961,15 +963,17 @@ class TextFieldComponentState extends State<TextFieldComponent> {
                     cursorColor: context.theme.colorScheme.primary,
                     cursorHeight: context.theme.extension<BubbleText>()!.bubbleText.fontSize! * 1.25,
                     decoration: InputDecoration(
-                      contentPadding: EdgeInsets.all(iOS && !kIsDesktop && !kIsWeb ? 10 : 12.5),
+                      contentPadding: material
+                          ? const EdgeInsets.symmetric(horizontal: 18, vertical: 13)
+                          : EdgeInsets.all(iOS && !kIsDesktop && !kIsWeb ? 10 : 12.5),
                       isDense: true,
                       isCollapsed: true,
                       hintText: isChatCreator
-                          ? "New Message"
+                          ? (material ? "Text message" : "New Message")
                           : ss.settings.recipientAsPlaceholder.value == true
                               ? isRecording ? "" : chat!.getTitle()
                               : (chat!.isTextForwarding && !isRecording)
-                                  ? "Text Message"
+                                  ? (material ? "Text message" : "Text Message")
                                   : (!isRecording) // Only show iMessage when not recording
                                     ? "iMessage" : "",
                       enabledBorder: InputBorder.none,
@@ -977,9 +981,10 @@ class TextFieldComponentState extends State<TextFieldComponent> {
                       focusedBorder: InputBorder.none,
                       filled: (isRecording & iOS),
                       fillColor: (isRecording & iOS) ? context.theme.colorScheme.primary.withOpacity(0.3) : Colors.transparent,
-                      hintStyle: context.theme.extension<BubbleText>()!.bubbleText.copyWith(color: context.theme.colorScheme.outline),
+                      hintStyle: context.theme.extension<BubbleText>()!.bubbleText.copyWith(
+                          color: material ? context.theme.colorScheme.onSurfaceVariant : context.theme.colorScheme.outline),
                       suffixIconConstraints: const BoxConstraints(minHeight: 0),
-                      suffixIcon: samsung && !isChatCreator
+                      suffixIcon: (samsung || material) && !isChatCreator
                           ? null
                           : Padding(
                               padding: EdgeInsets.only(right: iOS ? 0.0 : 5.0),

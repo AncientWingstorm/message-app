@@ -124,60 +124,36 @@ class _ConversationListFABState extends CustomState<ConversationListFAB, void, C
         alignment: Alignment.center,
         duration: const Duration(milliseconds: 300),
         secondChild: const SizedBox.shrink(),
-        firstChild: SizedBox(
-          width: ns.width(context),
-          height: 125,
-          child: Stack(
-            alignment: Alignment.bottomCenter,
-            clipBehavior: Clip.none,
-            children: [
-              AnimatedOpacity(
-                opacity: !controller.showMaterialFABText ? 1 : 0,
-                duration: const Duration(milliseconds: 300),
-                child: FloatingActionButton.small(
-                  heroTag: null,
-                  onPressed: () async {
-                    await controller.materialScrollController.animateTo(0, duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
-                    setState(() {
-                      controller.showMaterialFABText = true;
-                    });
-                  },
-                  child: Icon(
-                    Icons.arrow_upward,
-                    color: context.theme.colorScheme.onSecondary,
-                  ),
-                  backgroundColor: context.theme.colorScheme.secondary,
-                ),
-              ),
-              Positioned(
-                right: material ? 15 : 0,
-                child: InkWell(
-                  onLongPress: ss.settings.cameraFAB.value && !kIsWeb && !kIsDesktop
-                      ? () => controller.openCamera(context) : null,
-                  child: Container(
-                    height: 65,
-                    padding: const EdgeInsets.only(right: 4.5, bottom: 9),
-                    child: CallbackShortcuts(
-                      bindings: _newMessageShortcuts,
-                      child: FloatingActionButton(
-                        focusNode: controller.newMessageFocusNode,
-                        backgroundColor: context.theme.colorScheme.primaryContainer,
-                        shape: const CircleBorder(),
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 5.0, right: 5.0, top: 2),
-                          child: Icon(
-                            CupertinoIcons.bubble_left,
-                            color: context.theme.colorScheme.onPrimaryContainer,
-                            size: 24,
-                          ),
-                        ),
-                        onPressed: () => controller.openNewChatCreator(context),
-                      ),
-                    ),
+        // Google Messages style extended "Start chat" FAB that shrinks while scrolling
+        firstChild: Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: InkWell(
+            onLongPress: ss.settings.cameraFAB.value && !kIsWeb && !kIsDesktop
+                ? () => controller.openCamera(context) : null,
+            child: CallbackShortcuts(
+              bindings: _newMessageShortcuts,
+              child: FloatingActionButton.extended(
+                heroTag: null,
+                focusNode: controller.newMessageFocusNode,
+                backgroundColor: context.theme.colorScheme.primaryContainer,
+                foregroundColor: context.theme.colorScheme.onPrimaryContainer,
+                elevation: 3,
+                highlightElevation: 3,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                isExtended: controller.showMaterialFABText,
+                extendedPadding: const EdgeInsets.symmetric(horizontal: 20),
+                icon: const Icon(Icons.chat_outlined, size: 24),
+                label: Text(
+                  "Start chat",
+                  style: context.theme.textTheme.labelLarge!.copyWith(
+                    color: context.theme.colorScheme.onPrimaryContainer,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
+                onPressed: () => controller.openNewChatCreator(context),
               ),
-            ],
+            ),
           ),
         ),
       ),

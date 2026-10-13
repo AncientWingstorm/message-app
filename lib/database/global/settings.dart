@@ -141,7 +141,7 @@ class Settings {
   final Rx<SecurityLevel> securityLevel = Rx<SecurityLevel>(SecurityLevel.locked);
   final RxBool incognitoKeyboard = RxBool(false);
 
-  final Rx<Skins> skin = Skins.iOS.obs;
+  final Rx<Skins> skin = Skins.Material.obs;
   final Rx<ThemeMode> theme = ThemeMode.system.obs;
   final Rx<SwipeDirection> fullscreenViewerSwipeDir = SwipeDirection.RIGHT.obs;
 
@@ -575,7 +575,7 @@ class Settings {
     ss.settings.securityLevel.value =
         map['securityLevel'] != null ? SecurityLevel.values[map['securityLevel']] : SecurityLevel.locked;
     ss.settings.incognitoKeyboard.value = map['incognitoKeyboard'] ?? false;
-    ss.settings.skin.value = map['skin'] != null ? Skins.values[map['skin']] : Skins.iOS;
+    ss.settings.skin.value = map['skin'] != null ? Skins.values[map['skin']] : Skins.Material;
     ss.settings.theme.value = map['theme'] != null ? ThemeMode.values[map['theme']] : ThemeMode.system;
     ss.settings.fullscreenViewerSwipeDir.value = map['fullscreenViewerSwipeDir'] != null
         ? SwipeDirection.values[map['fullscreenViewerSwipeDir']]
@@ -751,7 +751,7 @@ class Settings {
     s.securityLevel.value =
         map['securityLevel'] != null ? SecurityLevel.values[map['securityLevel']] : SecurityLevel.locked;
     s.incognitoKeyboard.value = map['incognitoKeyboard'] ?? false;
-    s.skin.value = map['skin'] != null ? Skins.values[map['skin']] : Skins.iOS;
+    s.skin.value = map['skin'] != null ? Skins.values[map['skin']] : Skins.Material;
     s.theme.value = map['theme'] != null ? ThemeMode.values[map['theme']] : ThemeMode.system;
     s.fullscreenViewerSwipeDir.value = map['fullscreenViewerSwipeDir'] != null
         ? SwipeDirection.values[map['fullscreenViewerSwipeDir']]

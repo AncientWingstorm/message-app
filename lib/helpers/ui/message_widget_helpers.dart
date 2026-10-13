@@ -16,7 +16,11 @@ import 'package:url_launcher/url_launcher.dart';
 List<InlineSpan> buildMessageSpans(BuildContext context, MessagePart part, Message message, {Color? colorOverride, bool hideBodyText = false}) {
   final textSpans = <InlineSpan>[];
   final textStyle = (context.theme.extensions[BubbleText] as BubbleText).bubbleText.apply(
-    color: colorOverride ?? (message.isFromMe! ? context.theme.colorScheme.onPrimary : context.theme.colorScheme.properOnSurface),
+    color: colorOverride ?? (message.isFromMe!
+        ? context.theme.colorScheme.onPrimary
+        : ss.settings.skin.value == Skins.Material
+            ? context.theme.colorScheme.gmOnReceivedBubble
+            : context.theme.colorScheme.properOnSurface),
     fontSizeFactor: message.isBigEmoji ? 3 : 1,
   );
 
@@ -76,7 +80,11 @@ List<InlineSpan> buildMessageSpans(BuildContext context, MessagePart part, Messa
 Future<List<InlineSpan>> buildEnrichedMessageSpans(BuildContext context, MessagePart part, Message message, {Color? colorOverride, bool hideBodyText = false}) async {
   final textSpans = <InlineSpan>[];
   final textStyle = (context.theme.extensions[BubbleText] as BubbleText).bubbleText.apply(
-    color: colorOverride ?? (message.isFromMe! ? context.theme.colorScheme.onPrimary : context.theme.colorScheme.properOnSurface),
+    color: colorOverride ?? (message.isFromMe!
+        ? context.theme.colorScheme.onPrimary
+        : ss.settings.skin.value == Skins.Material
+            ? context.theme.colorScheme.gmOnReceivedBubble
+            : context.theme.colorScheme.properOnSurface),
     fontSizeFactor: message.isBigEmoji ? 3 : 1,
   );
   // extract rich content

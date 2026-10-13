@@ -257,27 +257,29 @@ class _TextFieldSuffixState extends OptimizedState<TextFieldSuffix> {
                 },
                 child: TextButton(
                   style: TextButton.styleFrom(
-                    backgroundColor: !iOS || (iOS && !isChatCreator && !showRecording)
+                    backgroundColor: material && !isChatCreator
+                        ? (showRecording ? context.theme.colorScheme.errorContainer : context.theme.colorScheme.gmContainer)
+                        : !iOS || (iOS && !isChatCreator && !showRecording)
                         ? null
                         : !isChatCreator && !showRecording
                         ? context.theme.colorScheme.outline
                         : context.theme.colorScheme.primary.withOpacity(0.4),
                     shape: const CircleBorder(),
                     padding: const EdgeInsets.all(0),
-                    maximumSize: kIsDesktop ? const Size(40, 40) : const Size(32, 32),
-                    minimumSize: kIsDesktop ? const Size(40, 40) : const Size(32, 32),
+                    maximumSize: material && !isChatCreator ? const Size(44, 44) : kIsDesktop ? const Size(40, 40) : const Size(32, 32),
+                    minimumSize: material && !isChatCreator ? const Size(44, 44) : kIsDesktop ? const Size(40, 40) : const Size(32, 32),
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                   child: isLinuxArm64 ? const SizedBox(height: 40) :
                     !isChatCreator && !showRecording
                     ? CupertinoIconWrapper(icon: Icon(
-                      iOS ? CupertinoIcons.waveform : Icons.mic_none,
-                      color: iOS ? context.theme.colorScheme.outline : context.theme.colorScheme.properOnSurface,
-                      size: iOS ? 24 : 20, // Waveform icon appears smaller, using size 24
+                      iOS ? CupertinoIcons.waveform : material ? Icons.mic_none_rounded : Icons.mic_none,
+                      color: iOS ? context.theme.colorScheme.outline : material ? context.theme.colorScheme.onBackground : context.theme.colorScheme.properOnSurface,
+                      size: iOS ? 24 : material ? 24 : 20, // Waveform icon appears smaller, using size 24
                     )) : CupertinoIconWrapper(icon: Icon(
                       iOS ? CupertinoIcons.stop_fill : Icons.stop_circle,
-                      color: iOS ? context.theme.colorScheme.primary : context.theme.colorScheme.properOnSurface,
-                      size: 15,
+                      color: iOS ? context.theme.colorScheme.primary : material ? context.theme.colorScheme.onErrorContainer : context.theme.colorScheme.properOnSurface,
+                      size: material ? 22 : 15,
                     )),
                   onPressed: () async => toggleRecording(context),
                 ),

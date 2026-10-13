@@ -175,17 +175,48 @@ extension ColorSchemeHelpers on ColorScheme {
 
   Color get onSmsBubble => iMessageBubble == primary ? onPrimaryContainer : onPrimary;
 
-  Color bubble(BuildContext context, bool iMessage) => ss.settings.monetTheming.value != Monet.none
+  Color bubble(BuildContext context, bool iMessage) => ss.settings.skin.value == Skins.Material
+      ? gmSentBubble
+      : ss.settings.monetTheming.value != Monet.none
       ? (iMessage ? iMessageBubble : smsBubble)
       : iMessage
           ? (context.theme.extensions[BubbleColors] as BubbleColors?)?.iMessageBubbleColor ?? iMessageBubble
           : (context.theme.extensions[BubbleColors] as BubbleColors?)?.smsBubbleColor ?? smsBubble;
 
-  Color onBubble(BuildContext context, bool iMessage) => ss.settings.monetTheming.value != Monet.none
+  Color onBubble(BuildContext context, bool iMessage) => ss.settings.skin.value == Skins.Material
+      ? gmOnSentBubble
+      : ss.settings.monetTheming.value != Monet.none
       ? (iMessage ? oniMessageBubble : onSmsBubble)
       : iMessage
           ? (context.theme.extensions[BubbleColors] as BubbleColors?)?.oniMessageBubbleColor ?? oniMessageBubble
           : (context.theme.extensions[BubbleColors] as BubbleColors?)?.onSmsBubbleColor ?? onSmsBubble;
+}
+
+/// Colors used by the Google Messages style (Material skin). These are derived
+/// from the base roles so they work with any theme and with Material You.
+extension GoogleMessagesColors on ColorScheme {
+  bool get _isLight => brightness == Brightness.light;
+
+  /// Outgoing message bubble
+  Color get gmSentBubble => primaryContainer;
+
+  Color get gmOnSentBubble => onPrimaryContainer;
+
+  /// Tonal container used for incoming bubbles, the search bar and the compose field
+  Color get gmContainer => Color.alphaBlend(
+        primaryContainer.withOpacity(_isLight ? 0.35 : 0.06),
+        Color.alphaBlend(onBackground.withOpacity(_isLight ? 0.05 : 0.09), background),
+      );
+
+  Color get gmOnContainer => onBackground;
+
+  /// Incoming message bubble
+  Color get gmReceivedBubble => gmContainer;
+
+  Color get gmOnReceivedBubble => onBackground;
+
+  /// Secondary text (timestamps, snippets, hints)
+  Color get gmSecondaryText => onSurfaceVariant;
 }
 
 extension ColorHelpers on Color {
@@ -302,6 +333,21 @@ MaterialColor createMaterialColor(Color color) {
     );
   }
   return MaterialColor(color.value, swatch);
+}
+
+/// Letter tile colors used for contact avatars in Google Messages
+const List<int> _googleMessagesAvatarColors = [
+  0xFFDB4437, 0xFFE91E63, 0xFF9C27B0, 0xFF673AB7, 0xFF3F51B5, 0xFF4285F4, 0xFF039BE5,
+  0xFF0097A7, 0xFF009688, 0xFF0F9D58, 0xFF689F38, 0xFFEF6C00, 0xFFFF5722, 0xFF757575,
+];
+
+Color googleMessagesAvatarColor(String? str) {
+  if (isNullOrEmpty(str)) return const Color(0xFF757575);
+  int total = 0;
+  for (int i = 0; i < str!.length; i++) {
+    total = (total * 31 + str.codeUnitAt(i)) & 0x7FFFFFFF;
+  }
+  return Color(_googleMessagesAvatarColors[total % _googleMessagesAvatarColors.length]);
 }
 
 List<Color> toColorGradient(String? str) {

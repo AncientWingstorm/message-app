@@ -37,91 +37,108 @@ class _MaterialConversationTileState extends CustomState<MaterialConversationTil
   @override
   Widget build(BuildContext context) {
     final leading = ChatLeading(controller: controller);
+    final unreadState = GlobalChatService.unreadState(controller.chat.guid);
+
+    final title = Obx(() => ChatTitle(
+          parentController: controller,
+          style: context.theme.textTheme.bodyLarge!.copyWith(
+            color: context.theme.colorScheme.onBackground,
+            fontWeight: unreadState.value || controller.shouldHighlight.value ? FontWeight.w700 : FontWeight.w400,
+          ),
+        ));
+
+    final subtitle = widget.deletedMode
+        ? Builder(builder: (context) {
+            var count = controller.chat.messages.where((i) => i.dateDeleted != null).length;
+            return Text(
+              "$count message${count == 1 ? '' : 's'}",
+              style: context.theme.textTheme.bodyMedium!.copyWith(color: context.theme.colorScheme.onSurfaceVariant),
+            );
+          })
+        : controller.subtitle ??
+            Obx(() {
+              final unread = unreadState.value;
+              return ChatSubtitle(
+                parentController: controller,
+                style: context.theme.textTheme.bodyMedium!.copyWith(
+                  fontWeight: unread ? FontWeight.w700 : FontWeight.w400,
+                  color: controller.shouldHighlight.value || unread
+                      ? context.theme.colorScheme.onBackground
+                      : context.theme.colorScheme.onSurfaceVariant,
+                ),
+              );
+            });
+
+    final trailing = widget.deletedMode
+        ? Builder(builder: (context) {
+            DateTime oldestDeletion = DateTime.now();
+            for (var message in controller.chat.messages) {
+              if (message.dateDeleted == null) continue;
+              // we are less than the oldest
+              if (message.dateDeleted!.compareTo(oldestDeletion) < 0) {
+                oldestDeletion = message.dateDeleted!;
+              }
+            }
+
+            var deleteDate = oldestDeletion.add(const Duration(days: 30));
+            var diff = deleteDate.difference(DateTime.now());
+            String d;
+            if (diff.isNegative) {
+              d = "Pending Deletion";
+            } else if (diff.inDays != 0) {
+              d = "${diff.inDays}d";
+            } else if (diff.inHours != 0) {
+              d = "${diff.inHours}h";
+            } else {
+              d = "${diff.inMinutes}m";
+            }
+
+            return Text(d, style: context.theme.textTheme.bodySmall!.copyWith(color: context.theme.colorScheme.onSurfaceVariant));
+          })
+        : MaterialTrailing(parentController: controller);
+
+    // Google Messages style row: avatar, then name + time on the first line and
+    // the message snippet (plus pin / mute icons) on the second line
     final child = Material(
       color: Colors.transparent,
-      borderRadius: const BorderRadius.only(
-        topLeft: Radius.circular(25),
-        bottomLeft: Radius.circular(25),
-      ),
       child: InkWell(
         mouseCursor: MouseCursor.defer,
         onTap: () => controller.onTap(context, widget.deletedMode),
         onSecondaryTapUp: widget.deletedMode ? null : (details) => controller.onSecondaryTap(Get.context!, details),
         onLongPress: widget.deletedMode ? null : controller.onLongPress,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(20),
-          bottomLeft: Radius.circular(20),
-        ),
-        child: ListTile(
-          mouseCursor: MouseCursor.defer,
-          dense: ss.settings.denseChatTiles.value,
-          visualDensity: ss.settings.denseChatTiles.value ? VisualDensity.compact : null,
-          minVerticalPadding: ss.settings.denseChatTiles.value ? 7.5 : 10,
-          title: Obx(() => ChatTitle(
-                parentController: controller,
-                style: context.theme.textTheme.bodyLarge!
-                    .copyWith(
-                      fontWeight: controller.shouldHighlight.value
-                          ? FontWeight.w600
-                          : GlobalChatService.unreadState(controller.chat.guid).value
-                              ? FontWeight.bold
-                              : null,
-                    )
-                    .apply(fontSizeFactor: 1.1),
-              )),
-          subtitle: widget.deletedMode ? Builder(builder: (context) {
-                var count = controller.chat.messages.where((i) => i.dateDeleted != null).length;
-                return Text("$count message${count == 1 ? '' : 's'}");
-              }) : controller.subtitle ??
-              Obx(() {
-                final unread = GlobalChatService.unreadState(controller.chat.guid).value;
-                return ChatSubtitle(
-                    parentController: controller,
-                    style: context.theme.textTheme.bodyMedium!
-                        .copyWith(
-                          fontWeight: unread ? FontWeight.bold : null,
-                          color: controller.shouldHighlight.value || unread ? context.textTheme.bodyMedium!.color : context.theme.colorScheme.outline,
-                          height: 1.5,
-                        )
-                        .apply(fontSizeFactor: 1.05),
-                  );
-      }),
-          contentPadding: const EdgeInsets.only(left: 6, right: 16),
-          leading: leading,
-          trailing: widget.deletedMode ? Builder(builder: (context) {
-                  DateTime oldestDeletion = DateTime.now();
-                  for (var message in controller.chat.messages) {
-                    if (message.dateDeleted == null) continue;
-                    // we are less than the oldest
-                    if (message.dateDeleted!.compareTo(oldestDeletion) < 0) {
-                      oldestDeletion = message.dateDeleted!;
-                    }
-                  }
-
-                  var deleteDate = oldestDeletion.add(const Duration(days: 30));
-                  var diff = deleteDate.difference(DateTime.now());
-                  String d;
-                  if (diff.isNegative) {
-                    d = "Pending Deletion";
-                  } else if (diff.inDays != 0) {
-                    d = "${diff.inDays}d";
-                  } else if (diff.inHours != 0) {
-                    d = "${diff.inHours}h";
-                  } else {
-                    d = "${diff.inMinutes}m";
-                  }
-
-
-                  var bodyStyle = context.theme.textTheme.bodySmall!
-                      .copyWith(
-                        color: controller.shouldHighlight.value
-                                ? context.theme.colorScheme.onBubble(context, controller.chat.isIMessage)
-                                : context.theme.colorScheme.outline,
-                        fontWeight: controller.shouldHighlight.value ? FontWeight.w500 : null,
-                      )
-                      .apply(fontSizeFactor: 1.1);
-                  return Padding(padding: const EdgeInsets.only(right: 8), child: Text(d, style: bodyStyle));
-                }) : MaterialTrailing(parentController: controller),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: ss.settings.denseChatTiles.value ? 8 : 12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              leading,
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(child: title),
+                        const SizedBox(width: 8),
+                        trailing,
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(child: subtitle),
+                        if (!widget.deletedMode) MaterialTileIcons(parentController: controller),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -129,21 +146,16 @@ class _MaterialConversationTileState extends CustomState<MaterialConversationTil
     return Obx(() {
       ns.listener.value;
       return AnimatedContainer(
-        padding: const EdgeInsets.only(left: 10),
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(20),
-            bottomLeft: Radius.circular(20),
-          ),
           color: controller.isSelected
-              ? context.theme.colorScheme.primaryContainer.withOpacity(0.5)
+              ? context.theme.colorScheme.secondaryContainer
               : shouldPartialHighlight
-                  ? context.theme.colorScheme.properSurface
+                  ? context.theme.colorScheme.gmContainer
                   : shouldHighlight
-                      ? context.theme.colorScheme.primaryContainer
+                      ? context.theme.colorScheme.secondaryContainer
                       : hoverHighlight
-                          ? context.theme.colorScheme.properSurface.withOpacity(0.5)
+                          ? context.theme.colorScheme.gmContainer.withOpacity(0.5)
                           : null,
         ),
         duration: const Duration(milliseconds: 100),
@@ -153,16 +165,50 @@ class _MaterialConversationTileState extends CustomState<MaterialConversationTil
                 onTap: () => controller.onTap(context, widget.deletedMode),
                 onSecondaryTapUp: (details) => controller.onSecondaryTap(Get.context!, details),
                 onLongPress: controller.onLongPress,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  bottomLeft: Radius.circular(20),
-                ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
                   child: Center(child: leading),
                 ),
               )
             : child,
+      );
+    });
+  }
+}
+
+/// Pin / mute indicators shown at the end of the snippet line
+class MaterialTileIcons extends CustomStateful<ConversationTileController> {
+  const MaterialTileIcons({Key? key, required super.parentController});
+
+  @override
+  State<StatefulWidget> createState() => _MaterialTileIconsState();
+}
+
+class _MaterialTileIconsState extends CustomState<MaterialTileIcons, void, ConversationTileController> {
+  @override
+  void initState() {
+    super.initState();
+    tag = controller.chat.guid;
+    forceDelete = false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final muted = GlobalChatService.muteState(controller.chat.guid).value == "mute";
+      final pinned = controller.chat.isPinned ?? false;
+      if (!muted && !pinned) return const SizedBox.shrink();
+      final color = context.theme.colorScheme.onSurfaceVariant;
+      return Padding(
+        padding: const EdgeInsets.only(left: 8, top: 2),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (muted) Icon(Icons.notifications_off_outlined, size: 16, color: color),
+            if (muted && pinned) const SizedBox(width: 4),
+            if (pinned) Icon(Icons.push_pin_outlined, size: 16, color: color),
+          ],
+        ),
       );
     });
   }
@@ -241,85 +287,36 @@ class _MaterialTrailingState extends CustomState<MaterialTrailing, void, Convers
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 3),
-      child: Obx(() {
-        final unread = GlobalChatService.unreadState(controller.chat.guid).value;
-        final muteType = GlobalChatService.muteState(controller.chat.guid).value;
+    return Obx(() {
+      final unread = GlobalChatService.unreadState(controller.chat.guid).value;
 
-        String indicatorText = "";
-        if (ss.settings.statusIndicatorsOnChats.value && (cachedLatestMessage?.isFromMe ?? false) && !controller.chat.isGroup) {
-          Indicator show = cachedLatestMessage?.indicatorToShow ?? Indicator.NONE;
-          if (show != Indicator.NONE) {
-            indicatorText = show.name.toLowerCase().capitalizeFirst!;
-          }
+      String indicatorText = "";
+      if (ss.settings.statusIndicatorsOnChats.value && (cachedLatestMessage?.isFromMe ?? false) && !controller.chat.isGroup) {
+        Indicator show = cachedLatestMessage?.indicatorToShow ?? Indicator.NONE;
+        if (show != Indicator.NONE) {
+          indicatorText = show.name.toLowerCase().capitalizeFirst!;
         }
+      }
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text(
-                  (cachedLatestMessage?.error ?? 0) > 0
-                      ? "Error"
-                      : "${indicatorText.isNotEmpty ? "$indicatorText\n" : ""}${buildChatListDateMaterial(cachedLatestMessage?.chatViewDate)}",
-                  textAlign: TextAlign.right,
-                  style: context.theme.textTheme.bodySmall!
-                      .copyWith(
-                        color: (cachedLatestMessage?.error ?? 0) > 0
-                            ? context.theme.colorScheme.error
-                            : controller.shouldHighlight.value || unread
-                                ? context.theme.colorScheme.onBackground
-                                : context.theme.colorScheme.outline,
-                        fontWeight: unread
-                            ? FontWeight.w600
-                            : controller.shouldHighlight.value
-                                ? FontWeight.w500
-                                : null,
-                      )
-                      .apply(fontSizeFactor: 1.1),
-                  overflow: TextOverflow.clip,
-                ),
-                if (muteType != "mute" && unread) 
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8.0),
-                    child: Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: context.theme.colorScheme.primary,
-                      ),
-                    ),
-                  )
-              ],
-            ),
-            const SizedBox(height: 5),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.end,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (controller.chat.isPinned!) Icon(Icons.push_pin_outlined, size: 15, color: context.theme.colorScheme.outline),
-                if (muteType == "mute")
-                  const SizedBox(width: 5),
-                if (muteType == "mute")
-                  Obx(() => Icon(
-                        Icons.notifications_off_outlined,
-                        color: controller.shouldHighlight.value || unread ? context.theme.colorScheme.primary : context.theme.colorScheme.outline,
-                        size: 15,
-                      )),
-              ],
-            ),
-          ],
-        );
-    })
-    );
+      final hasError = (cachedLatestMessage?.error ?? 0) > 0;
+      return Text(
+        hasError
+            ? "Not sent"
+            : "${indicatorText.isNotEmpty ? "$indicatorText • " : ""}${buildChatListDateMaterial(cachedLatestMessage?.chatViewDate)}",
+        textAlign: TextAlign.right,
+        maxLines: 1,
+        style: context.theme.textTheme.bodySmall!.copyWith(
+          fontSize: 12,
+          color: hasError
+              ? context.theme.colorScheme.error
+              : controller.shouldHighlight.value || unread
+                  ? context.theme.colorScheme.onBackground
+                  : context.theme.colorScheme.onSurfaceVariant,
+          fontWeight: unread ? FontWeight.w700 : FontWeight.w400,
+        ),
+        overflow: TextOverflow.clip,
+      );
+    });
   }
 }
 
