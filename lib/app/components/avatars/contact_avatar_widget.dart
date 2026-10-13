@@ -194,6 +194,7 @@ class _ContactAvatarWidgetState extends OptimizedState<ContactAvatarWidget> {
                       style: TextStyle(
                         fontSize: material ? (size * 0.45).roundToDouble() : (widget.fontSize ?? 18).roundToDouble(),
                         fontWeight: material ? FontWeight.w500 : null,
+                        fontFamily: material ? googleSansFamily : null,
                         color: material && widget.handle == null ? context.theme.colorScheme.onPrimary : Colors.white,
                       ),
                       textAlign: TextAlign.center,

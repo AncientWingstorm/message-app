@@ -19,6 +19,7 @@ ThemesService ts = Get.isRegistered<ThemesService>() ? Get.find<ThemesService>()
 
 const String googleMessagesDarkName = "Google Messages Dark";
 const String googleMessagesLightName = "Google Messages Light";
+const String googleSansFamily = "GoogleSans";
 
 class ThemesService extends GetxService {
   mui_utils.CorePalette? monetPalette;
@@ -320,7 +321,28 @@ class ThemesService extends GetxService {
   }
   
   Tuple2 getStructsFromData(ThemeData light, ThemeData dark) {
-    return Platform.isWindows ? _applyWindowsAccent(light, dark) : _applyMonet(light, dark);
+    final tuple = Platform.isWindows ? _applyWindowsAccent(light, dark) : _applyMonet(light, dark);
+    return Tuple2(applyGoogleSans(tuple.item1), applyGoogleSans(tuple.item2));
+  }
+
+  /// Re-applies the current light / dark themes (e.g. after the skin changes)
+  void reloadTheme(BuildContext context) => _loadTheme(context);
+
+  /// Google Messages uses Google Sans. Apply it to the Material skin, unless the
+  /// theme has a custom font selected.
+  ThemeData applyGoogleSans(ThemeData theme) {
+    if (ss.settings.skin.value != Skins.Material) return theme;
+    final current = theme.textTheme.bodyMedium?.fontFamily;
+    if (current != null && current != "Roboto" && current != googleSansFamily) return theme;
+    final bubbleText = theme.extension<BubbleText>();
+    return theme.copyWith(
+      textTheme: theme.textTheme.apply(fontFamily: googleSansFamily),
+      primaryTextTheme: theme.primaryTextTheme.apply(fontFamily: googleSansFamily),
+      extensions: [
+        ...theme.extensions.values.where((e) => e is! BubbleText),
+        if (bubbleText != null) bubbleText.copyWith(bubbleText: bubbleText.bubbleText.copyWith(fontFamily: googleSansFamily)),
+      ],
+    );
   }
 
   Future<ThemeStruct> revertToPreviousDarkTheme() async {

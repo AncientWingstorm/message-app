@@ -133,6 +133,7 @@ class _ThemingPanelState extends CustomState<ThemingPanel, void, ThemingPanelCon
                         await cm.setAllInactive();
                         ss.settings.skin.value = val;
                         saveSettings();
+                        ts.reloadTheme(context);
                         setState(() {});
                         eventDispatcher.emit('theme-update', null);
                       },
